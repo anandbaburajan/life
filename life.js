@@ -34,14 +34,15 @@ class Cell {
 }
 
 class World {
-  static numRows = window.innerHeight;
-  static numColumns = window.innerHeight;
+  static numRows = Math.ceil(window.innerHeight / 10);
+  static numColumns = Math.ceil(window.innerWidth / 10);
 
   constructor(canvasId) {
     this.canvas = document.getElementById(canvasId);
     this.context = this.canvas.getContext("2d");
     this.grid = [];
 
+    console.log(World.numRows, World.numColumns);
     this.createGrid();
 
     window.requestAnimationFrame(() => this.gameLoop());
@@ -50,23 +51,31 @@ class World {
   createGrid() {
     for (let i = 0; i < World.numRows; i++)
       for (let j = 0; j < World.numColumns; j++)
-        this.grid.push(new Cell(this.context, i, j));
+        this.grid.push(new Cell(this.context, j, i));
   }
 
-  gridToIndex(i, j) {
-    return i + j * World.numColumns;
+  createGlider(x, y) {
+    this.grid[this.gridToIndex(x, y)].alive = true;
+    this.grid[this.gridToIndex(x + 1, y + 1)].alive = true;
+    this.grid[this.gridToIndex(x + 2, y + 1)].alive = true;
+    this.grid[this.gridToIndex(x + 2, y)].alive = true;
+    this.grid[this.gridToIndex(x + 2, y - 1)].alive = true;
   }
 
-  isAlive(i, j) {
-    if (i < 0 || i >= World.numRows || j < 0 || j >= World.numColumns)
+  gridToIndex(x, y) {
+    return x + y * World.numColumns;
+  }
+
+  isAlive(x, y) {
+    if (x < 0 || x >= World.numColumns || y < 0 || y >= World.numRows)
       return false;
 
-    return this.grid[this.gridToIndex(i, j)].alive ? 1 : 0;
+    return this.grid[this.gridToIndex(x, y)].alive ? 1 : 0;
   }
 
   checkSurrounding() {
-    for (let i = 0; i < World.numRows; i++) {
-      for (let j = 0; j < World.numColumns; j++) {
+    for (let i = 0; i < World.numColumns; i++) {
+      for (let j = 0; j < World.numRows; j++) {
         const numAlive =
           this.isAlive(i - 1, j - 1) +
           this.isAlive(i, j - 1) +
