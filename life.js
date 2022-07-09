@@ -19,7 +19,7 @@ class Cell {
     this.gridX = gridX;
     this.gridY = gridY;
 
-    this.alive = Math.random() > 0.9;
+    this.alive = Math.random() > 0.92;
   }
 
   draw() {
@@ -42,7 +42,6 @@ class World {
     this.context = this.canvas.getContext("2d");
     this.grid = [];
 
-    console.log(World.numRows, World.numColumns);
     this.createGrid();
 
     window.requestAnimationFrame(() => this.gameLoop());
@@ -117,4 +116,11 @@ class World {
 
 window.onload = () => {
   let gameWorld = new World("canvas");
+
+  canvas.addEventListener("click", (event) => {
+    const x = Math.round(event.pageX / Cell.width);
+    const y = Math.round(event.pageY / Cell.width);
+
+    gameWorld.createGlider(x, y);
+  });
 };
