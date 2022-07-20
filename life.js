@@ -9,6 +9,23 @@ resize();
 
 window.addEventListener("resize", resize);
 
+const patterns = [
+  // blinker
+  [
+    [0, 0],
+    [0, 1],
+    [0, 2],
+  ],
+  // glider
+  [
+    [0, 0],
+    [1, 1],
+    [2, 1],
+    [2, 0],
+    [2, -1],
+  ],
+];
+
 class Cell {
   static width = 10;
   static height = 10;
@@ -53,12 +70,12 @@ class World {
         this.grid.push(new Cell(this.context, j, i));
   }
 
-  createGlider(x, y) {
-    this.grid[this.gridToIndex(x, y)].alive = true;
-    this.grid[this.gridToIndex(x + 1, y + 1)].alive = true;
-    this.grid[this.gridToIndex(x + 2, y + 1)].alive = true;
-    this.grid[this.gridToIndex(x + 2, y)].alive = true;
-    this.grid[this.gridToIndex(x + 2, y - 1)].alive = true;
+  addPattern(x, y, patternIdx = 0) {
+    for (const coordinates of patterns[patternIdx]) {
+      this.grid[
+        this.gridToIndex(x + coordinates[1], y + coordinates[0])
+      ].alive = true;
+    }
   }
 
   gridToIndex(x, y) {
@@ -116,11 +133,25 @@ class World {
 
 window.onload = () => {
   let gameWorld = new World("canvas");
+  let patternIdx = 0;
 
   canvas.addEventListener("click", (event) => {
     const x = Math.round(event.pageX / Cell.width);
     const y = Math.round(event.pageY / Cell.width);
 
-    gameWorld.createGlider(x, y);
+    gameWorld.addPattern(x, y, patternIdx);
   });
+
+  canvas.addEventListener(
+    "wheel",
+    (event) => {
+      event.stopPropagation();
+      if (event.deltaY > 0) {
+        patternIdx = patternIdx === patterns.length - 1 ? 0 : patternIdx + 1;
+      } else {
+        patternIdx = patternIdx === 0 ? patterns.length - 1 : patternIdx - 1;
+      }
+    },
+    true
+  );
 };
